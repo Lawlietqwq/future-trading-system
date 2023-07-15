@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csubigdata.futurestradingsystem.dao.ModelMapper">
+
+    <resultMap id="ModelMap" type="com.csubigdata.futurestradingsystem.entity.Model">
+        <id column="model_id" jdbcType="INTEGER" property="modelId" />
+        <result column="code" jdbcType="VARCHAR" property="code" />
+        <result column="uid" jdbcType="INTEGER" property="uid" />
+        <result column="open_id" jdbcType="INTEGER" property="openId" />
+        <result column="close_id" jdbcType="INTEGER" property="closeId" />
+        <result column="lot" jdbcType="INTEGER" property="lot" />
+        <result column="open_name" jdbcType="VARCHAR" property="openName" />
+        <result column="close_name" jdbcType="VARCHAR" property="closeName" />
+        <result column="open_class" jdbcType="VARCHAR" property="openClass" />
+        <result column="close_class" jdbcType="VARCHAR" property="closeClass" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
+        <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+        <result column="bk_or_sk" jdbcType="TINYINT" property="bkOrSk"/>
+        <result column="model_state" property="modelState" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <collection property="openParams" ofType="com.csubigdata.futurestradingsystem.entity.Parameter" select="com.csubigdata.futurestradingsystem.dao.ParameterMapper.getByModelIdAndStrategyId" column="{modelId=model_id,strategyId=open_id}"/>
+        <collection property="closeParams" ofType="com.csubigdata.futurestradingsystem.entity.Parameter" select="com.csubigdata.futurestradingsystem.dao.ParameterMapper.getByModelIdAndStrategyId" column="{modelId=model_id,strategyId=close_id}"/>
+    </resultMap>
+
+    <resultMap id="ModelInstanceMap" type="com.csubigdata.futurestradingsystem.dto.ModelInstanceDTO">
+        <id column="model_id" jdbcType="INTEGER" property="modelId" />
+        <result column="uid" jdbcType="INTEGER" property="uid" />
+        <result column="code" jdbcType="VARCHAR" property="code" />
+        <result column="open_class" jdbcType="VARCHAR" property="openClass" />
+        <result column="close_class" jdbcType="VARCHAR" property="closeClass" />
+        <result column="bk_or_sk" jdbcType="TINYINT" property="bkOrSk"/>
+        <result column="model_state" property="modelState" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result column="xinyi_account" jdbcType="VARCHAR" property="xinyiAccount"/>
+        <result column="xinyi_pwd" jdbcType="VARCHAR" property="xinyiPwd"/>
+        <result column="trading_account" jdbcType="VARCHAR" property="tradingAccount"/>
+        <result column="trading_pwd" jdbcType="VARCHAR" property="tradingPwd"/>
+        <result column="company" jdbcType="VARCHAR" property="company"/>
+        <association property="lot" jdbcType="INTEGER" select="com.csubigdata.futurestradingsystem.dao.PositionMapper.getOpenNumByModelId" column="model_id"/>
+        <collection property="openParams" ofType="com.csubigdata.futurestradingsystem.entity.Parameter" select="com.csubigdata.futurestradingsystem.dao.ParameterMapper.getByModelIdAndStrategyId" column="{modelId=model_id,strategyId=open_id}"/>
+        <collection property="closeParams" ofType="com.csubigdata.futurestradingsystem.entity.Parameter" select="com.csubigdata.futurestradingsystem.dao.ParameterMapper.getByModelIdAndStrategyId" column="{modelId=model_id,strategyId=close_id}"/>
+    </resultMap>
+
+
+    <sql id="allModelColumns">
+        model_id, code, uid, open_id, close_id, lot, open_name, close_name, open_class, close_class, create_time, start_time, end_time, bk_or_sk, model_state
+    </sql>
+
+    <sql id="modelInstanceColumns">
+        m.model_id, m.uid, m.code, open_id, close_id, open_class, close_class, bk_or_sk, model_state, xinyi_account, xinyi_pwd, trading_account, trading_pwd, company
+    </sql>
+
+    <select id="getAllModelByUid" resultMap="ModelMap">
+        select
+            <include refid="allModelColumns"></include>
+        from models
+        where uid=#{uid,jdbcType=INTEGER}
+    </select>
+
+    <select id="getAll" resultMap="ModelMap">
+        select
+            <include refid="allModelColumns"></include>
+        from models
+    </select>
+
+    <select id="getById" resultMap="ModelMap">
+        select
+            <include refid="allModelColumns"></include>
+        from models
+        where model_id=#{modelId,jdbcType=INTEGER}
+    </select>
+
+    <select id="getAllToMemory" resultMap="ModelInstanceMap">
+        select
+            <include refid="modelInstanceColumns"></include>
+        from models m join user u
+        on m.uid = u.uid
+        where model_state != 'created' and model_state != 'closed'
+    </select>
+
+    <insert id="insert" parameterType="com.csubigdata.futurestradingsystem.entity.Model" useGeneratedKeys="true" keyProperty="modelId">
+        insert into models (<include refid="allModelColumns"></include>)
+        values (null,
+                #{code,jdbcType=VARCHAR},
+                #{uid,jdbcType=INTEGER},
+                #{openId,jdbcType=INTEGER},
+                #{closeId,jdbcType=INTEGER},
+                #{lot,jdbcType=INTEGER},
+                #{openName,jdbcType=VARCHAR},
+                #{closeName,jdbcType=VARCHAR},
+                #{openClass,jdbcType=VARCHAR},
+                #{closeClass,jdbcType=VARCHAR},
+                #{createTime,jdbcType=TIMESTAMP},
+                #{startTime,jdbcType=TIMESTAMP},
+                #{endTime,jdbcType=TIMESTAMP}
+                #{bkOrSk,jdbcType=TINYINT},
+                #{modelState})
+    </insert>
+
+    <update id="updateByIdSelective" parameterType="com.csubigdata.futurestradingsystem.entity.Model">
+        update models
+        set
+            <if test="code != null">
+                code=#{code},
+            </if>
+            <if test="uid != null">
+                uid=#{uid},
+            </if>
+            <if test="openId != null">
+                open_id=#{openId},
+            </if>
+            <if test="closeId != null">
+                close_id=#{closeId},
+            </if>
+            <if test="lot != null">
+                lot=#{lot},
+            </if>
+            <if test="openName != null">
+                open_name=#{openName},
+            </if>
+            <if test="closeName != null">
+                close_name=#{closeName},
+            </if>
+            <if test="openClass != null">
+                open_class=#{openClass},
+            </if>
+            <if test="closeClass != null">
+                close_class=#{closeClass},
+            </if>
+            <if test="createTime != null">
+                create_time=#{createTime},
+            </if>
+            <if test="startTime != null">
+                start_time=#{startTime},
+            </if>
+            <if test="endTime != null">
+                end_time=#{endTime},
+            </if>
+            <if test="bkOrSk != null">
+                bk_or_sk=#{bkOrSk},
+            </if>
+            <if test="modelState != null">
+                model_state=#{modelState}
+            </if>
+        where model_id=#{modelId}
+    </update>
+
+    <update id="updateStateById" parameterType="com.csubigdata.futurestradingsystem.entity.Model">
+        update models
+        set
+            model_state = #{modelState},
+            <if test="startTime != null">
+                start_time = #{startTime},
+            </if>
+            end_time = #{endTime}
+        where model_id = #{modelId}
+    </update>
+
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        delete from models
+        where model_id=#{modelId,jdbcType=INTEGER}
+    </delete>
+
+    <insert id="insertSelective" parameterType="com.csubigdata.futurestradingsystem.entity.Model" useGeneratedKeys="true" keyProperty="modelId">
+        insert into models
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                code,
+                uid,
+                open_id,
+                close_id,
+                lot,
+                open_name,
+                close_name,
+                open_class,
+                close_class,
+                create_time,
+            <if test="startTime != null">
+                start_time,
+            </if>
+            <if test="endTime != null">
+                end_time,
+            </if>
+            <if test="bkOrSk != null">
+                bk_or_sk,
+            </if>
+            <if test="modelState != null">
+                model_state
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                #{code,jdbcType=VARCHAR},
+                #{uid,jdbcType=INTEGER},
+                #{openId,jdbcType=INTEGER},
+                #{closeId,jdbcType=INTEGER},
+                #{lot,jdbcType=INTEGER},
+                #{openName,jdbcType=VARCHAR},
+                #{closeName,jdbcType=VARCHAR},
+                #{openClass,jdbcType=VARCHAR},
+                #{closeClass,jdbcType=VARCHAR},
+                #{createTime,jdbcType=TIMESTAMP},
+            <if test="startTime != null">
+                #{startTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="endTime != null">
+                #{endTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="bkOrSk != null">
+                #{bkOrSk,jdbcType=TINYINT},
+            </if>
+            <if test="modelState != null">
+                #{modelState}
+            </if>
+        </trim>
+    </insert>
+
+</mapper>

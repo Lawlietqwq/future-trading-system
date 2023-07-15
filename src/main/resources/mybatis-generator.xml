@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC
+        "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration>
+
+    <!-- 本地数据库驱动程序jar包的全路径 -->
+<!--    <classPathEntry location="D:\programming_software\Java\maven\maven_repository\mysql\mysql-connector-java\5.1.39"/>-->
+
+    <context id="MySQL" targetRuntime="MyBatis3">
+
+<!--        <plugin type="org.mybatis.generator.plugins.SerializablePlugin">-->
+<!--            <property name="mappers" value="com.bigdata.futurestradingsystems.util.GeneratorDisplay"/>-->
+<!--        </plugin>-->
+
+        <commentGenerator>
+            <property name="suppressDate" value="true"/>
+            <property name="suppressAllComments" value="true" />
+            <!--其中suppressDate是去掉生成日期那行注释，suppressAllComments是去掉所有的注-->
+        </commentGenerator>
+
+        <!-- 数据库的相关配置 -->
+        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/futures_trading_system"
+                        userId="root"
+                        password="123456">
+        </jdbcConnection>
+
+        <!-- 实体类生成的位置 -->
+        <javaModelGenerator targetPackage="com.bigdata.futurestradingsystems.model" targetProject="src/main/java">
+            <property name="enableSubPackages" value="false"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+
+        <!-- *Mapper.xml 文件的位置 -->
+        <sqlMapGenerator targetPackage="mybatis/mapper" targetProject="src/main/resources">
+            <property name="enableSubPackages" value="false"/>
+        </sqlMapGenerator>
+
+        <!-- Mapper 接口文件的位置 -->
+        <javaClientGenerator targetPackage="com.bigdata.futurestradingsystems.dao" targetProject="src/main/java" type="XMLMAPPER">
+            <property name="enableSubPackages" value="false"/>
+        </javaClientGenerator>
+
+        <!-- 映射几张表就写几个table标签 -->
+        <table tableName="records"
+               domainObjectName="Records"
+               enableCountByExample="false"
+               enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>
+        <table tableName="strategy"
+               domainObjectName="Strategy"
+               enableCountByExample="false"
+               enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>
+
+        <table tableName="user"
+               domainObjectName="User"
+               enableCountByExample="false"
+               enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+        </table>
+
+        <table tableName="user_to_strategy"
+               domainObjectName="UserToStrategy"
+               enableCountByExample="false"
+               enableDeleteByExample="false"
+               enableSelectByExample="false"
+               enableUpdateByExample="false">
+
+        </table>
+    </context>
+</generatorConfiguration>

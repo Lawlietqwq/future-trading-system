@@ -1,0 +1,71 @@
+server:
+  port: 8888
+spring:
+  datasource:
+    # 数据库相关配置
+    url: jdbc:mysql://csubigdata.com:3306/jq_futures
+    username: root
+    password: Bigdata.db@2021
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jackson:
+    date-format: yyyy-MM-dd
+    time-zone: Asia/Shanghai
+  mvc:
+    format:
+      date: yyyy-MM-dd
+      date-time: yyyy-MM-dd HH:mm:ss
+  redis:
+    host: 121.89.234.19
+#    host: 122.207.108.56
+#    host: 127.0.0.1
+    port: 6399
+    database: 0
+    timeout: 10000
+    expire: 60000
+
+#  redis:
+#    host:
+#    port: 6379
+#    password:
+#    lettuce:
+#      pool:
+#        max-active: 8
+#    connect-timeout: 30000
+
+
+mybatis:
+  #  # 指定 mapper.xml 的位置
+  #  mapper-locations: classpath:mybatis/mapper/*.xml
+  #  #扫描实体类的位置,在此处指明扫描实体类的包，在 mapper.xml 中就可以不写实体类的全路径名
+  #  type-aliases-package: net.biancheng.www.bean
+  # 可以不写mybatis全局配置文件，所有全局配置文件的配置都放在configuration配置项中即可
+  mapper-locations: classpath:mapper/*.xml # sql映射文件位置
+  type-aliases-package: com.bigdata.futurestradingsystem.model
+  configuration:  # 指定mybatis全局配置文件中的配置项
+    #    map-underscore-to-camel-case: true # 是否开启驼峰命名自动映射，即从经典数据库列名 A_COLUMN 映射到经典 Java 属性名 aColumn
+
+    mapUnderscoreToCamelCase: true
+    cache-enabled: false #禁用二级缓存
+    local-cache-scope: statement #一级缓存指定为statement级别
+
+
+logging:
+  config: classpath:logback.xml
+
+
+jwt:
+  expiration: 18000000
+  secret: csubigdata
+
+request:
+  login:
+    url: /login
+
+mythreadpool:
+  maxPoolSize: 40
+  corePoolSize: 20
+  queueCapacity: 500
+  keepAliveSeconds: 60
+  threadNamePrefix: springThreadPool
+  waitForTasksToCompleteOnShutdown: true
+  executorName: taskExecutor

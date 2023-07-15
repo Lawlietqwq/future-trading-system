@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csubigdata.futurestradingsystem.dao.StrategyMapper">
+
+  <resultMap id="StrategyMap" type="com.csubigdata.futurestradingsystem.entity.Strategy">
+    <id column="strategy_id" jdbcType="INTEGER" property="strategyId" />
+    <result column="strategy_name" jdbcType="VARCHAR" property="strategyName"/>
+    <result column="open_or_close" jdbcType="TINYINT" property="openOrClose" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <collection property="strategyParamList" ofType="com.csubigdata.futurestradingsystem.entity.StrategyToParam" select="com.csubigdata.futurestradingsystem.dao.StrategyToParamsMapper.getStrategyParamById"
+    column="strategy_id"/>
+  </resultMap>
+
+  <resultMap id="OpenStrategy" type="com.csubigdata.futurestradingsystem.entity.OpenStrategy">
+    <id column="strategy_id" jdbcType="INTEGER" property="openId" />
+    <result column="strategy_name" jdbcType="VARCHAR" property="openName"/>
+    <result column="remark" jdbcType="VARCHAR" property="openClass" />
+    <collection property="openParams" ofType="com.csubigdata.futurestradingsystem.entity.StrategyToParam" select="com.csubigdata.futurestradingsystem.dao.StrategyToParamsMapper.getStrategyParamById"
+                column="strategy_id"/>
+  </resultMap>
+
+  <resultMap id="CloseStrategy" type="com.csubigdata.futurestradingsystem.entity.CloseStrategy">
+    <id column="strategy_id" jdbcType="INTEGER" property="closeId" />
+    <result column="strategy_name" jdbcType="VARCHAR" property="closeName"/>
+    <result column="remark" jdbcType="VARCHAR" property="closeClass" />
+    <collection property="closeParams" ofType="com.csubigdata.futurestradingsystem.entity.StrategyToParam" select="com.csubigdata.futurestradingsystem.dao.StrategyToParamsMapper.getStrategyParamById"
+                column="strategy_id"/>
+  </resultMap>
+  
+  <sql id="allStrategyColumns">
+    strategy_id, strategy_name, open_or_close, remark
+  </sql>
+
+  <sql id="openColumns">
+    strategy_id, strategy_name, remark
+  </sql>
+
+  <select id="getById" resultMap="StrategyMap">
+    select
+        <include refid="allStrategyColumns"></include>
+    from strategy
+    where strategy_id=#{strategyId,jdbcType=INTEGER}
+  </select>
+
+  <select id="getAll" resultMap="StrategyMap">
+    select
+        <include refid="allStrategyColumns"></include>
+    from strategy
+  </select>
+
+  <select id="getAllOpenStrategy" resultMap="OpenStrategy">
+    select
+        <include refid="openColumns"></include>
+    from strategy
+    where open_or_close = 0
+  </select>
+
+  <select id="getAllCloseStrategy" resultMap="CloseStrategy">
+    select
+        <include refid="openColumns"></include>
+    from strategy
+    where open_or_close = 1
+  </select>
+
+  <insert id="insertStrategy" parameterType="com.csubigdata.futurestradingsystem.entity.Strategy" useGeneratedKeys="true" keyProperty="strategyId">
+    insert into strategy (`strategy_name`,`open_or_close`, `remark`)
+    values (#{strategyName, jdbcType=VARCHAR},#{openOrClose, jdbcType=TINYINT},#{remark, jdbcType=VARCHAR})
+  </insert>
+
+
+  <insert id="insertSelective" parameterType="com.csubigdata.futurestradingsystem.entity.Strategy">
+    insert into strategy
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="strategyId != null">
+        strategy_id,
+      </if>
+      <if test="strategyName != null">
+        strategyName,
+      </if>
+      <if test="openOrClose != null">
+        open_or_close,
+      </if>
+      <if test="remark != null">
+        remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="strategyId != null">
+        #{strategyId,jdbcType=INTEGER},
+      </if>
+      <if test="strategyName != null">
+        #{strategyName,jdbcType=VARCHAR},
+      </if>
+      <if test="openOrClose != null">
+        #{openOrClose,jdbcType=TINYINT},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByIdSelective" parameterType="com.csubigdata.futurestradingsystem.entity.Strategy">
+    update strategy
+    <set>
+      <if test="strategyName != null">
+        strategy_name = #{strategyName,jdbcType=VARCHAR},
+      </if>
+      <if test="openOrClose != null">
+        open_or_close = #{openOrClose,jdbcType=TINYINT},
+      </if>
+      <if test="remark != null">
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where strategy_id = #{strategyId,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateById" parameterType="com.csubigdata.futurestradingsystem.entity.Strategy">
+    update strategy
+    set strategy_name=#{strategyName,jdbcType=VARCHAR},
+        open_or_close=#{openOrClose,jdbcType=TINYINT},
+        remark=#{remark,jdbcType=VARCHAR},
+    where strategy_id=#{strategyId,jdbcType=INTEGER}
+  </update>
+
+</mapper>

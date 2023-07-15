@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csubigdata.futurestradingsystem.dao.UserMapper">
+
+  <resultMap id="UserMap" type="com.csubigdata.futurestradingsystem.entity.User">
+    <result column="uid" jdbcType="INTEGER" property="uid"/>
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="email" jdbcType="VARCHAR" property="email"/>
+    <result column="xinyi_account" jdbcType="VARCHAR" property="xinyiAccount"/>
+    <result column="xinyi_pwd" jdbcType="VARCHAR" property="xinyiPwd"/>
+    <result column="trading_account" jdbcType="VARCHAR" property="tradingAccount"/>
+    <result column="trading_pwd" jdbcType="VARCHAR" property="tradingPwd"/>
+    <result column="company" jdbcType="VARCHAR" property="company"/>
+  </resultMap>
+
+  <sql id="allUserColumns">
+    uid, username, password, email, xinyi_account, xinyi_pwd, trading_account, trading_pwd, company
+  </sql>
+
+  <select id="getById" resultMap="UserMap">
+    select
+    <include refid="allUserColumns"></include>
+    from user
+    where uid=#{uid}
+  </select>
+
+  <select id="getByUsername" resultType="com.csubigdata.futurestradingsystem.entity.User">
+    select <include refid="allUserColumns"></include>
+    from user
+    where username = #{username}
+  </select>
+
+    <select id="getAllCompany" resultType="java.lang.String">
+        select company_name
+        from company
+    </select>
+
+    <insert id="insert" parameterType="com.csubigdata.futurestradingsystem.entity.User" useGeneratedKeys="true" keyProperty="uid">
+    insert into user (<include refid="allUserColumns"></include>)
+    values (null,
+            #{username,jdbcType=VARCHAR},
+            #{password,jdbcType=VARCHAR},
+            #{email,jdbcType=VARCHAR},
+            #{xinyiAccount,jdbcType=VARCHAR},
+            #{xinyiPwd,jdbcType=VARCHAR},
+            #{tradingAccount,jdbcType=VARCHAR},
+            #{tradingPwd,jdbcType=VARCHAR},
+            #{company,jdbcType=VARCHAR}
+            )
+  </insert>
+
+</mapper>

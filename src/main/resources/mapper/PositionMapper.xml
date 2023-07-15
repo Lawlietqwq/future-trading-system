@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csubigdata.futurestradingsystem.dao.PositionMapper">
+
+    <resultMap id="positionMap" type="com.csubigdata.futurestradingsystem.entity.Position">
+        <result column="holding_id" jdbcType="INTEGER" property="holdingId" />
+        <result column="uid" jdbcType="INTEGER" property="uid" />
+        <result column="model_id" jdbcType="INTEGER" property="modelId" />
+        <result column="code" jdbcType="VARCHAR" property="code" />
+        <result column="open_price" jdbcType="FLOAT" property="openPrice" />
+        <result column="open_num" jdbcType="INTEGER" property="openNum" />
+        <result column="open_time" jdbcType="TIMESTAMP" property="openTime" />
+        <result column="bk_or_sk" jdbcType="TINYINT" property="bkOrSk" />
+    </resultMap>
+
+    <resultMap id="positionVOMap" type="com.csubigdata.futurestradingsystem.vo.PositionVO">
+        <result column="holding_id" jdbcType="INTEGER" property="holdingId" />
+        <result column="uid" jdbcType="INTEGER" property="uid" />
+        <result column="model_id" jdbcType="INTEGER" property="modelId" />
+        <result column="open_id" jdbcType="INTEGER" property="openId" />
+        <result column="close_id" jdbcType="INTEGER" property="closeId" />
+        <result column="open_name" jdbcType="VARCHAR" property="openName" />
+        <result column="close_name" jdbcType="VARCHAR" property="closeName" />
+        <result column="code" jdbcType="VARCHAR" property="code" />
+        <result column="open_price" jdbcType="FLOAT" property="openPrice" />
+        <result column="open_num" jdbcType="INTEGER" property="openNum" />
+        <result column="open_time" jdbcType="TIMESTAMP" property="openTime" />
+        <result column="bk_or_sk" jdbcType="TINYINT" property="bkOrSk" />
+        <collection property="openParams" ofType="com.csubigdata.futurestradingsystem.entity.Parameter" select="com.csubigdata.futurestradingsystem.dao.ParameterMapper.getByModelIdAndStrategyId" column="{modelId=model_id,strategyId=open_id}"/>
+        <collection property="closeParams" ofType="com.csubigdata.futurestradingsystem.entity.Parameter" select="com.csubigdata.futurestradingsystem.dao.ParameterMapper.getByModelIdAndStrategyId" column="{modelId=model_id,strategyId=close_id}"/>
+    </resultMap>
+
+    <sql id="allPositionColumn">
+        holding_id, uid, model_id, code, open_price, open_num, open_time, bk_or_sk
+    </sql>
+
+    <sql id="allPositionVOColumn">
+        holding_id, t.uid, t.model_id, open_id, close_id, open_name, close_name, t.code, open_price, open_num, open_time, t.bk_or_sk
+    </sql>
+
+    <select id="getAllHoldingByModelId" resultMap="positionVOMap">
+        select <include refid="allPositionVOColumn"></include>
+        from trading_holding t join models m
+        on t.model_id = m.model_id
+        where t.model_id = #{modelId}
+    </select>
+
+    <select id="getAllHoldingByUid" resultMap="positionVOMap">
+        select <include refid="allPositionVOColumn"></include>
+        from trading_holding t join models m
+        on t.model_id = m.model_id
+        where t.uid = #{uid}
+    </select>
+
+    <select id="getAllHoldingByCode" resultMap="positionVOMap">
+        select <include refid="allPositionVOColumn"></include>
+        from trading_holding t join models m
+        on t.model_id = m.model_id
+        where t.code = #{code}
+    </select>
+
+    <select id="getOpenNumByModelId" resultType="int">
+        select open_num
+        from trading_holding
+        where model_id = #{modelId}
+    </select>
+
+    <insert id="insert" parameterType="com.csubigdata.futurestradingsystem.entity.Position" useGeneratedKeys="true" keyProperty="holdingId">
+        insert into trading_holding (<include refid="allPositionColumn"></include>)
+        values (
+            null,
+            #{uid},
+            #{modelId},
+            #{code},
+            #{openPrice},
+            #{openNum},
+            #{openTime},
+            #{bkOrSk}
+        )
+    </insert>
+
+    <insert id="updateLotById">
+        update trading_holding
+        set
+            open_num = #{openNum}
+            <if test="newModelId != null">
+                ,model_id = #{newModelId}
+            </if>
+        where model_id = #{modelId}
+    </insert>
+
+    <delete id="deleteById">
+        delete from trading_holding
+        where model_id = #{modelId}
+    </delete>
+
+</mapper>
+

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.csubigdata.futurestradingsystem.dao.StrategyToParamsMapper">
+
+    <resultMap id="StrategyParamMap" type="com.csubigdata.futurestradingsystem.entity.StrategyToParam">
+        <result column="strategy_id" jdbcType="INTEGER" property="strategyId"/>
+        <result column="param_name" jdbcType="VARCHAR" property="paramName"/>
+        <result column="param_description" jdbcType="INTEGER" property="paramDescription"/>
+    </resultMap>
+
+    <select id="getStrategyParamById" resultMap="StrategyParamMap">
+        select *
+        from strategy_to_params
+        where strategy_id=#{strategyId}
+    </select>
+
+    <insert id="insertStrategyParam">
+        insert into strategy_to_params(strategy_id,param_name,param_description)
+        values (#{strategyId,jdbcType=INTEGER},
+                #{paramName,jdbcType=VARCHAR},
+                #{paramDescription,jdbcType=VARCHAR})
+    </insert>
+
+</mapper>
