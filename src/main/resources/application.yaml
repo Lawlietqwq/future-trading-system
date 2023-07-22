@@ -3,9 +3,9 @@ server:
 spring:
   datasource:
     # 数据库相关配置
-    url: jdbc:mysql://csubigdata.com:3306/jq_futures
-    username: root
-    password: Bigdata.db@2021
+    url: 
+    username:
+    password: 
     driver-class-name: com.mysql.cj.jdbc.Driver
   jackson:
     date-format: yyyy-MM-dd
@@ -15,9 +15,9 @@ spring:
       date: yyyy-MM-dd
       date-time: yyyy-MM-dd HH:mm:ss
   redis:
-    host: 121.89.234.19
-#    host: 122.207.108.56
-#    host: 127.0.0.1
+    host: 
+#    host: 
+#    host: 
     port: 6399
     database: 0
     timeout: 10000
