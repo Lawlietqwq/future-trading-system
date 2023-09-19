@@ -63,7 +63,7 @@ request:
 
 mythreadpool:
   maxPoolSize: 40
-  corePoolSize: 20
+  corePoolSize: 13
   queueCapacity: 500
   keepAliveSeconds: 60
   threadNamePrefix: springThreadPool

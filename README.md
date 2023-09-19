@@ -22,6 +22,9 @@ futurestradingsystem
 ├── dto -- 数据传输对象
 ├── entity -- 实体类
 ├── intercepter-- 拦截器，防止重复提交
+├── mq -- RocketMQ消息队列消费binlog同步缓存
+├── patterns -- 策略模式
+     ├── handler -- 缓存同步处理器
 ├── service -- 业务逻辑层，负责对合约、持仓、策略以及用户的一些操作
 ├── strategy -- 策略相关，实现期货交易所用策略
      ├── impl  包含所有交易策略类，必须实现TradingExecutable接口

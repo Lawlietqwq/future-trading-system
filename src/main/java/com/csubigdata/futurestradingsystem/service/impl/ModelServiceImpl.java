@@ -22,14 +22,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static com.csubigdata.futurestradingsystem.common.RedisCommonKey.MODEL_KEY_PREFIX;
 
 @Service
 @Slf4j
@@ -43,7 +45,7 @@ public class ModelServiceImpl implements ModelService {
     private ParameterMapper parameterMapper;
 
     @Autowired
-    private ContractMapper contractMapper;
+    private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
     private PositionMapper positionMapper;
@@ -68,8 +70,18 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     public List<ModelVO> getUserAllModel(int uid) {
+        String key = MODEL_KEY_PREFIX + uid;
+        List<ModelVO> modelVOS = null;
+        if(Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))){
+            HashOperations<String, Object, Object> stringObjectObjectHashOperations = stringRedisTemplate.opsForHash();
+            List<Object> models = new ArrayList<>(stringObjectObjectHashOperations.entries(key).values());
+            if (!CollectionUtils.isEmpty(models)) {
+                modelVOS = BeanUtil.copyList(models, ModelVO.class);
+                return modelVOS;
+            }
+            return null;
+        }
         List<Model> models = modelMapper.getAllModelByUid(uid);
-        List<ModelVO> modelVOS;
 
         if (!CollectionUtils.isEmpty(models)) {
             modelVOS = BeanUtil.copyList(models, ModelVO.class);
@@ -79,9 +91,19 @@ public class ModelServiceImpl implements ModelService {
     }
 
     @Override
-    public ModelVO getModelById(int modelId) {
-        Model model = modelMapper.getById(modelId);
+    public ModelVO getModelById(int uid, int modelId) {
+        String key = MODEL_KEY_PREFIX + uid;
         ModelVO modelVO = new ModelVO();
+        if(Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))){
+            HashOperations<String, Object, Object> stringObjectObjectHashOperations = stringRedisTemplate.opsForHash();
+            Object model = stringObjectObjectHashOperations.get(key, modelId);
+            if (model != null) {
+                modelVO = (ModelVO)BeanUtil.copyProperties(model, modelVO);
+                return modelVO;
+            }
+        }
+        Model model = modelMapper.getById(modelId);
+
         if (model == null) {
             CommonException.fail(ResultTypeEnum.QUERY_FAIL);
         } else {
@@ -119,6 +141,7 @@ public class ModelServiceImpl implements ModelService {
                 }
             }
         }
+        stringRedisTemplate.opsForHash().put(MODEL_KEY_PREFIX + model.getUid(), model.getModelId(), model);
     }
 
     @Override
@@ -163,14 +186,14 @@ public class ModelServiceImpl implements ModelService {
         int oldModelId = newCloseStrategyVO.getModelId();
         Class openClazz = null;
         Class closeClazz = null;
-        ModelVO oldModel = ((ModelService) AopContext.currentProxy()).getModelById(newCloseStrategyVO.getModelId());
+        ModelVO oldModel = ((ModelService) AopContext.currentProxy()).getModelById(newCloseStrategyVO.getUid(), newCloseStrategyVO.getModelId());
         Model newModel = BeanUtil.copyProperties(oldModel, Model.class);
         newModel.setCloseId(newCloseStrategyVO.getCloseId());
         newModel.setCloseName(newCloseStrategyVO.getCloseName());
         newModel.setCloseClass(newCloseStrategyVO.getCloseClass());
         newModel.setCloseParams(newCloseStrategyVO.getCloseParams());
         if (!modelInstanceMap.containsKey(oldModelId)) {
-            ((ModelService) AopContext.currentProxy()).deleteModel(oldModelId);
+            ((ModelService) AopContext.currentProxy()).deleteModel(oldModel.getUid() ,oldModelId);
             newModel.setLot(newCloseStrategyVO.getLot());
             ((ModelService) AopContext.currentProxy()).createNewModel(newModel);
             return;
@@ -179,7 +202,7 @@ public class ModelServiceImpl implements ModelService {
             if (isFinished){
                 ReentrantLock lock = modelInstanceMap.get(oldModelId).getLock();
                 if (lock.tryLock()){
-                    ((ModelService) AopContext.currentProxy()).deleteModel(oldModelId);
+                    ((ModelService) AopContext.currentProxy()).deleteModel(oldModel.getUid(), oldModelId);
                     newModel.setLot(newCloseStrategyVO.getLot());
                     ((ModelService) AopContext.currentProxy()).createNewModel(newModel);
                     lock.unlock();
@@ -192,7 +215,7 @@ public class ModelServiceImpl implements ModelService {
         if (!modelInstance.isFinished() && lock.tryLock()) {
             int lot = modelInstance.getModelState().getState().equals("started")? newCloseStrategyVO.getLot():Math.min(newCloseStrategyVO.getLot(), modelInstance.getLot());
             if (modelInstance.getModelState().getState().equals("started")){
-                ((ModelService) AopContext.currentProxy()).deleteModel(oldModelId);
+                ((ModelService) AopContext.currentProxy()).deleteModel(oldModel.getUid(), oldModelId);
                 newModel.setLot(lot);
                 ((ModelService) AopContext.currentProxy()).createNewModel(newModel);
                 modelInstance.setFinished(true);
@@ -218,7 +241,10 @@ public class ModelServiceImpl implements ModelService {
                     modelInstance.setFinished(true);
 //                ((ModelService) AopContext.currentProxy()).updateModelStateById(modelInstance.getModelId(), ModelStateEnum.created);
                     boolean succuss = modelMapper.deleteById(modelInstance.getModelId()) > 0;
+                    //如果剩余手数为0直接删除原model
                     if (!succuss) CommonException.fail(ResultTypeEnum.DELETE_MODEL_ERROR);
+                    //缓存删除
+                    else stringRedisTemplate.opsForHash().delete(MODEL_KEY_PREFIX + modelInstance.getUid(), modelInstance.getModelId());
                     positionMapper.updateLotById(modelInstance.getModelId(), newModelId, lot);
                 } else {
                     Model model = BeanUtil.copyProperties(oldModel, Model.class);
@@ -251,9 +277,10 @@ public class ModelServiceImpl implements ModelService {
             if (modelInstance.getModelState().getState().equals("started")) CommonException.fail(ResultTypeEnum.IS_OPENNING);
             else CommonException.fail(ResultTypeEnum.IS_CLOSING);
         }
+        stringRedisTemplate.opsForHash().put(MODEL_KEY_PREFIX + newCloseStrategyVO.getUid(), newCloseStrategyVO.getModelId(), newCloseStrategyVO);
     }
     @Override
-    public void deleteModel(int modelId) {
+    public void deleteModel(int uid, int modelId) {
         if (!AsyncTask.getModelInstanceMap().containsKey(modelId) || AsyncTask.getModelInstanceMap().get(modelId).isFinished()) {
             boolean success = modelMapper.deleteById(modelId) > 0;
             if (!success) {
@@ -263,6 +290,7 @@ public class ModelServiceImpl implements ModelService {
         else {
             CommonException.fail(ResultTypeEnum.DELETE_MODEL_ERROR);
         }
+        stringRedisTemplate.opsForHash().delete(MODEL_KEY_PREFIX + uid, modelId);
 //            ReentrantLock lock = AsyncTask.getModelInstanceMap().get(modelId).getLock();
 //            if (lock.tryLock()) {
 //                boolean success = modelMapper.deleteById(modelId) > 0;

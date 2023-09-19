@@ -16,6 +16,8 @@ public class NewCloseStrategyVO implements Serializable {
 
     private static final long serialVersionUID = -3217122480017882131L;
 
+    private int uid;
+
     private int modelId;
 
     private int closeId;

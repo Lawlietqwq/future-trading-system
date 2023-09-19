@@ -6,6 +6,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Component
 public class SpringContextUtil implements ApplicationContextAware {
 
@@ -30,6 +32,10 @@ public class SpringContextUtil implements ApplicationContextAware {
     //通过class获取Bean.
     public static <T> T getBean(Class<T> clazz) {
         return getApplicationContext().getBean(clazz);
+    }
+
+    public static <T> Map<String, T> getBeansOfType(Class<T> clazz) {
+        return getApplicationContext().getBeansOfType(clazz);
     }
 
     //通过name,以及Clazz返回指定的Bean

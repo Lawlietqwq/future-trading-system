@@ -22,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Component("asyncTask")
@@ -32,7 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Slf4j
 public class AsyncTask {
 
-    public static Map<Integer,ModelInstance> modelInstanceMap = new HashMap<>();
+    public static Map<Integer,ModelInstance> modelInstanceMap = new ConcurrentHashMap<>();
     @Resource
     private ContractService contractService;
     @Resource

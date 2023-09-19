@@ -27,24 +27,24 @@ public class RecordController {
     }
 
     @GetMapping("/model")
-    Result<List<RecordVO>> getAllRecordByModelId(int modelId){
-        List<RecordVO> record = recordService.getAllRecordByModelId(modelId);
+    Result<List<RecordVO>> getAllRecordByModelId(int uid, int modelId){
+        List<RecordVO> record = recordService.getAllRecordByModelId(uid, modelId);
         Result<List<RecordVO>> result = new Result<>(ResultTypeEnum.SUCCESS);
         result.setData(record);
         return result;
     }
 
     @GetMapping("/code")
-    Result<List<RecordVO>> getAllRecordByCode(String code){
-        List<RecordVO> record = recordService.getAllRecordByCode(code);
+    Result<List<RecordVO>> getAllRecordByCode(int uid, String code){
+        List<RecordVO> record = recordService.getAllRecordByCode(uid, code);
         Result<List<RecordVO>> result = new Result<>(ResultTypeEnum.SUCCESS);
         result.setData(record);
         return result;
     }
 
-    @DeleteMapping("/{recordId}")
-    Result deleteByRecordId(@PathVariable("recordId") int recordId){
-        recordService.deleteByRecordId(recordId);
+    @DeleteMapping("/del")
+    Result deleteByRecordId(int uid, int recordId){
+        recordService.deleteByRecordId(uid, recordId);
         return new Result(ResultTypeEnum.SUCCESS);
     }
 

@@ -26,10 +26,11 @@ public interface ModelService {
 
     /**
      * 得到某个模型的信息
-     * @param modelId 交易模型id
+     * @param uid 用户id
+     * @param modelId 模型id
      * @return
      */
-    ModelVO getModelById(int modelId);
+    ModelVO getModelById(int uid, int modelId);
 
     /**
      * 更新模型
@@ -90,7 +91,7 @@ public interface ModelService {
      * 删除交易模型
      * @param modelId 模型id
      */
-    void deleteModel(int modelId);
+    void deleteModel(int uid, int modelId);
 
 
 }

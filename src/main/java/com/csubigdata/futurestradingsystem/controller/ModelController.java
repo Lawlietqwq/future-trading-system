@@ -47,14 +47,14 @@ public class ModelController {
 
     /**
      * 根据模型Id获取模型
-     *
+     * @param uid
      * @param modelId
      * @return
      */
-    @GetMapping("/{modelId}")
-    public Result<ModelVO> getModelById(@PathVariable("modelId") int modelId) {
+    @GetMapping("/{uid}#{modelId}")
+    public Result<ModelVO> getModelById(@PathVariable("uid") int uid, @PathVariable("modelId") int modelId) {
         Result<ModelVO> result = new Result<>(ResultTypeEnum.SUCCESS);
-        ModelVO modelVO = modelService.getModelById(modelId);
+        ModelVO modelVO = modelService.getModelById(uid, modelId);
         result.setData(modelVO);
         return result;
     }
@@ -133,9 +133,9 @@ public class ModelController {
      * @return
      */
     @RepeatSubmit
-    @DeleteMapping("/{modelId}")
-    public Result deleleModelById(@PathVariable("modelId") int modelId){
-        modelService.deleteModel(modelId);
+    @DeleteMapping("/del")
+    public Result deleleModelById(int uid, int modelId){
+        modelService.deleteModel(uid ,modelId);
         return new Result<>(ResultTypeEnum.SUCCESS);
     }
 
