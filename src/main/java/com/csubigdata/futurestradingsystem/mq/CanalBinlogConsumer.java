@@ -40,7 +40,7 @@ public class CanalBinlogConsumer implements RocketMQListener<CanalBinLogDTO> {
                 || !StrUtil.equals(message.getTable(), "trading_history")){
             return;
         }
-        // 通过策略模式进行不同 Binlog 变更类型的监听，比如说订单和座位两个表就分别有两个处理类
+        // 通过策略模式进行不同 Binlog 变更类型的监听
         abstractStrategyChoose.chooseAndExecute(
                 message.getTable(),
                 message
