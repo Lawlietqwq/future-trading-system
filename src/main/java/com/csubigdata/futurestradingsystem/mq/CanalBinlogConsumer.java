@@ -25,9 +25,6 @@ public class CanalBinlogConsumer implements RocketMQListener<CanalBinLogDTO> {
 
     private final AbstractStrategyChoose abstractStrategyChoose;
 
-    @Value("${ticket.availability.cache-update.type:}")
-    private String ticketAvailabilityCacheUpdateType;
-
     @Override
     public void onMessage(CanalBinLogDTO message) {
         // 如果是 DDL 返回
